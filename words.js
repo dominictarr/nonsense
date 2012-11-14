@@ -1,7 +1,7 @@
 
 var fs = require('fs')
 var split = require('split')
-var rWord = require('..')(4)
+var rWord = require('./')(4)
 var through = require('through')
 var rs
 
