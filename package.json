@@ -1,0 +1,21 @@
+{
+  "name": "nonsense",
+  "version": "0.0.0",
+  "homepage": "https://github.com/dominictarr/nonsense",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dominictarr/nonsense.git"
+  },
+  "dependencies": {
+    "through": "~1.1.1"
+  },
+  "devDependencies": {
+    "split": "~0.1.0",
+    "random-name": "0.0.0"
+  },
+  "scripts": {
+    "test": "set -e; for t in test/*.js; do node $t; done"
+  },
+  "author": "'Dominic Tarr' <dominic.tarr@gmail.com> (http://dominictarr.com)",
+  "license": "MIT"
+}
