@@ -13,10 +13,15 @@ var rs
   }))
   .pipe(rWord)
 
-var i = 0
-var int = setInterval(function() {
-  console.log(rWord.random())
-  if(i > 500) 
-    clearInterval(int), rs.destroy()
-}, 100)
+module.exports = rWord
 
+if(!module.parent) {
+
+  var i = 0
+  var int = setInterval(function() {
+    console.log(rWord.random())
+    if(i > 500) 
+      clearInterval(int), rs.destroy()
+  }, 100)
+
+}

@@ -2,7 +2,7 @@
 
 Streams of nonsense in realtime!
 
-Using markov chains on letters.
+Using markov chains on the letters.
 
 ## example
 
