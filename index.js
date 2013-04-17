@@ -6,41 +6,60 @@ useful for generating random test data.
 
 {
   abc: {
-  d: 1
-  '': 4 //< that means the end of the word.
-}
+    d: 1
+    '': 4 //< that means the end of the word.
+  }
 
 }
 
 **/
 
 
+function sub(seq, from, to) {
+  var f = Array.isArray(seq) ? seq.slice : seq.substring
+  return to == null ? f.call(seq, from) : f.call(seq, from, to)
+}
+
+function cat(seq, seq2) {
+  if(Array.isArray(seq2) || Array.isArray(seq))
+    return [].concat(seq).concat(seq2)
+  return seq + seq2
+}
+
+function get (seq, i) {
+  return Array.isArray(seq) ? [seq[i]] : seq[i]
+}
+
+function getMap(map, str) {
+  return map[Array.isArray(str) ? str.join('|') : str]
+}
 var through = require('through')
 
 module.exports = function (len) {
   var map = {}, ts, starts = {}
+  var useArray
   function inc (str, c) {
     if(!c) return
+
     map[str] = map[str] || {}
     map[str][c] = (map[str][c || ''] || 0) + 1
     map[str]['*'] = (map[str]['*'] || 0) + 1
   }
 
   ts = through(function (word) {
-    word = '^'+word+'$'
+    if(null == useArray) useArray = Array.isArray(word)
+    word = cat(cat('^', word), '$')
     var first = true
     while (word.length >= len) {
-      var str = word.substring(0, len)
-      var char = word[len]
+      var str = sub(word, 0, len)
+      var char = get(word, len)
+      if(useArray) str = str.join('|')
       if(first) {
         first = false
         starts[str] = (starts[str] || 0) + 1
         starts['*'] = (starts['*'] || 0) + 1
-        //if(!~starts.indexOf(str))
-        //starts.push(str)
       }
-        
-      word = word.substring(1)
+      word = sub(word, 1)
       inc(str, char)
     }
     this.emit('data', word)
@@ -56,21 +75,27 @@ module.exports = function (len) {
     for (var i in set) {
       if(i !== '*') {
         sum += set[i]
-        if(sum > target)
+        if(sum > target) {
           return i
+        }
       }
     }
 
   }
 
-  ts.random = function () {
-    var word = from(ts.starts)
-    while(word[word.length - 1] != '$') {
-      var last = word.substring(word.length - len)
-      word += from(map[last])
-    }
-    return word.substring(1, word.length - 1)
+  ts.random = function (max) {
+    max = max || Infinity
+    do {
+      var word = from(ts.starts)
+      if(useArray)
+        word = word.split('|')
+      while(word[word.length - 1] != '$') {
+        var last = sub(word, word.length - len)
+        word = cat(word, from(getMap(map, last)))
+      }
+    } while(word.length - 2 >= max);
+    return sub(word, 1, word.length - 1)
   }
-  return ts
 
+  return ts
 }
