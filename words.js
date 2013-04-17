@@ -1,17 +1,9 @@
 
 var fs = require('fs')
-var split = require('split')
-var rWord = require('./')(4)
-var through = require('through')
-var rs
+var nonsense = require('./')
 
-(rs = fs.createReadStream('/usr/share/dict/words'))
-  .pipe(split())
-  .pipe(through(function (word) {
-    if(/'s$/.test(word)) return
-    this.emit('data', word.toLowerCase())
-  }))
-  .pipe(rWord)
+var rWord =
+  nonsense.words(rs = fs.createReadStream('/usr/share/dict/words'), 4)
 
 module.exports = rWord
 
@@ -21,7 +13,7 @@ if(!module.parent) {
   var int = setInterval(function() {
     console.log(rWord.random())
     if(i > 500) 
-      clearInterval(int), rs.destroy()
+      clearInterval(int)
   }, 100)
 
 }

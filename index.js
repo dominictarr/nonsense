@@ -1,3 +1,6 @@
+var split = require('split')
+var through = require('through')
+
 /***
 given a stream of words, map to a datastructure that maps a given length of chars
 to a next letter, with frequencies.
@@ -33,9 +36,8 @@ function get (seq, i) {
 function getMap(map, str) {
   return map[Array.isArray(str) ? str.join('|') : str]
 }
-var through = require('through')
 
-module.exports = function (len) {
+exports = module.exports = function (len) {
   var map = {}, ts, starts = {}
   var useArray
   function inc (str, c) {
@@ -98,4 +100,35 @@ module.exports = function (len) {
   }
 
   return ts
+}
+
+exports.words = function (stream, len) {
+  return stream
+  .pipe(split())
+  .pipe(through(function (word) {
+    var self = this
+    word.split(/\s+/).forEach(function (word) {
+      if(/'s$/.test(word)) return
+      word = word.trim()
+      if(word)
+        self.emit('data', word.toLowerCase())
+    })
+  }))
+  .pipe(exports(len))
+}
+
+var sentence = /([A-Z][^.]*\.)/
+
+exports.sentences = function (stream, len) {
+  return stream
+  .pipe(split(sentence))
+  .pipe(through(function (words) {
+    if(!sentence.test(words)) return
+    if(words.length < 30)    return
+    words = words.toLowerCase().split(/\s+/).filter(function (e) {
+      return !!e
+    })
+    this.emit('data', words)
+  }))
+  .pipe(exports(len))
 }
